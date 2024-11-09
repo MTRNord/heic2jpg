@@ -6,9 +6,19 @@ use relm4::{
 use relm4_components::{open_dialog::*, save_dialog::*};
 use std::path::PathBuf;
 
+#[derive(Debug, PartialEq)]
+pub(super) enum InOut {
+    Input,
+    Output,
+}
+
+#[derive(Debug)]
 pub(super) struct SelectFolder {
     open_dialog: Controller<OpenDialog>,
     folder: Option<PathBuf>,
+    description: String,
+    button_label: String,
+    direction: InOut,
 }
 
 #[derive(Debug)]
@@ -21,11 +31,12 @@ pub(super) enum SelectFolderMsg {
 #[derive(Debug)]
 pub(super) enum SelectFolderOut {
     FolderSelected(PathBuf),
+    AbortLast,
 }
 
 #[relm4::component(pub)]
 impl SimpleComponent for SelectFolder {
-    type Init = ();
+    type Init = InOut;
     type Input = SelectFolderMsg;
     type Output = SelectFolderOut;
 
@@ -34,28 +45,50 @@ impl SimpleComponent for SelectFolder {
             set_hexpand: true,
             set_vexpand: true,
             set_title: "Select Folder",
-            set_description: Some("Select the folder containing the HEIC files you want to convert"),
+            set_description: Some(&model.description),
 
             gtk::Box {
-                set_orientation: gtk::Orientation::Vertical,
+                set_halign: gtk::Align::Center,
+                set_orientation: gtk::Orientation::Horizontal,
                 set_spacing: 24,
 
                 gtk::Button {
                     set_halign: gtk::Align::Center,
-                    set_label: "Select input directory",
+                    set_label: &model.button_label,
                     connect_clicked[sender] => move |_| {
                         sender.input(SelectFolderMsg::OpenRequest);
                     }
                 },
+
+                // If this is the output folder selector, add an Abort button
+                gtk::Button {
+                    set_visible: model.direction == InOut::Output,
+                    set_halign: gtk::Align::Center,
+                    set_label: "Abort",
+                    connect_clicked[sender] => move |_| {
+                        let _ = sender.output(SelectFolderOut::AbortLast);
+                    }
+                }
             }
         }
     }
 
     fn init(
-        _init: Self::Init,
+        init: Self::Init,
         root: Self::Root,
         sender: ComponentSender<Self>,
     ) -> ComponentParts<Self> {
+        let (description, button_label) = match init {
+            InOut::Input => (
+                "Select the folder where the Heic files can be found",
+                "Select input directory",
+            ),
+            InOut::Output => (
+                "Select the folder where the JPG files are meant to be saved",
+                "Select output directory",
+            ),
+        };
+
         let dialog_settings = OpenDialogSettings {
             folder_mode: true,
             ..Default::default()
@@ -72,6 +105,9 @@ impl SimpleComponent for SelectFolder {
         let model = Self {
             open_dialog,
             folder: None,
+            description: description.to_string(),
+            button_label: button_label.to_string(),
+            direction: init,
         };
 
         let widgets = view_output!();

@@ -1,6 +1,6 @@
 use crate::config::{APP_ID, PROFILE};
 use crate::modals::about::AboutDialog;
-use crate::select_folder::{SelectFolder, SelectFolderOut};
+use crate::select_folder::{InOut, SelectFolder, SelectFolderOut};
 use gtk::prelude::*;
 use gtk::{gio, glib};
 use relm4::{
@@ -25,6 +25,7 @@ pub(super) enum AppMsg {
     DeselectInputFolder,
     DeselectOutputFolder,
     Quit,
+    Noop,
 }
 
 relm4::new_action_group!(pub(super) WindowActionGroup, "win");
@@ -90,50 +91,40 @@ impl SimpleComponent for App {
                 },
 
                 // If no folder is selected, show the folder selector
-                if model.input_folder.is_none() {
+                if model.input_folder.is_some() && model.output_folder.is_some() {
+                    adw::StatusPage {
+                        set_hexpand: true,
+                        set_vexpand: true,
+                        set_title: "Start Conversion",
+                        set_description: Some("Press the button to start the conversion"),
+
+                        gtk::Box {
+                            set_halign: gtk::Align::Center,
+                            set_orientation: gtk::Orientation::Horizontal,
+                            set_spacing: 24,
+                            gtk::Button {
+                                set_label: "Convert",
+                                connect_clicked[sender] => move |_| {
+                                    // TODO: Implement conversion using worker and imagick
+                                    sender.input(AppMsg::Quit);
+                                }
+                            }
+                        }
+                    }
+                } else if model.input_folder.is_none() {
                     gtk::Box {
                         set_vexpand: true,
                         set_hexpand: true,
                         append = model.input_folder_selector.widget(),
                     }
                 } else {
-                    adw::StatusPage {
-                        set_hexpand: true,
+                    gtk::Box {
                         set_vexpand: true,
-                        set_title: "Select Output Folder",
-                        set_description: Some("Select the folder where the converted JPG files should be saved"),
-
-                        gtk::Box {
-                            set_orientation: gtk::Orientation::Vertical,
-                            set_spacing: 24,
-                            gtk::Label {
-                                set_halign: gtk::Align::Center,
-                                #[watch]
-                                set_text: &format!("Selected Input Folder: {}", model.input_folder.as_ref().map(|p| p.to_string_lossy()).unwrap_or_default())
-                            },
-                            gtk::Box {
-                                set_halign: gtk::Align::Center,
-                                set_orientation: gtk::Orientation::Horizontal,
-                                set_spacing: 24,
-                                gtk::Button {
-                                    set_halign: gtk::Align::Center,
-                                    set_label: "Select output directory",
-                                    connect_clicked[sender] => move |_| {
-
-                                    }
-                                },
-
-                                gtk::Button {
-                                    set_halign: gtk::Align::Center,
-                                    set_label: "Abort",
-                                    connect_clicked[sender] => move |_| {
-                                        sender.input(AppMsg::DeselectInputFolder);
-                                    }
-                                },
-                            }
-                        }
+                        set_hexpand: true,
+                        append = model.output_folder_selector.widget(),
                     }
                 }
+
             }
 
         }
@@ -150,17 +141,18 @@ impl SimpleComponent for App {
             .detach();
         let input_folder_selector =
             SelectFolder::builder()
-                .launch(())
+                .launch(InOut::Input)
                 .forward(sender.input_sender(), |msg| match msg {
                     SelectFolderOut::FolderSelected(path) => AppMsg::InputFolderSelected(path),
+                    SelectFolderOut::AbortLast => AppMsg::Noop,
                 });
-                let output_folder_selector =
-                    SelectFolder::builder()
-                        .launch(())
-                        .forward(sender.input_sender(), |msg| match msg {
-                            SelectFolderOut::FolderSelected(path) => AppMsg::InputFolderSelected(path),
-                        });
-
+        let output_folder_selector =
+            SelectFolder::builder()
+                .launch(InOut::Output)
+                .forward(sender.input_sender(), |msg| match msg {
+                    SelectFolderOut::FolderSelected(path) => AppMsg::OutputFolderSelected(path),
+                    SelectFolderOut::AbortLast => AppMsg::DeselectInputFolder,
+                });
 
         let model = Self {
             about_dialog,
@@ -204,6 +196,7 @@ impl SimpleComponent for App {
             AppMsg::OutputFolderSelected(path) => self.output_folder = Some(path),
             AppMsg::DeselectOutputFolder => self.output_folder = None,
             AppMsg::Quit => main_application().quit(),
+            AppMsg::Noop => {}
         }
     }
 

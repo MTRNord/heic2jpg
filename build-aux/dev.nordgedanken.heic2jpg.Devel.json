@@ -35,6 +35,7 @@
         ]
     },
     "modules": [
+        "./imagemagick.yaml",
         {
             "name": "heic2jpg",
             "buildsystem": "meson",

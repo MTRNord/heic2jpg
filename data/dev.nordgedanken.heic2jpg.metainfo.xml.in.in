@@ -10,6 +10,9 @@
   <description>
     <p>A boilerplate template for GTK + Rust. It uses Meson as a build system and has flatpak support by default.</p>
   </description>
+  <categories>
+    <category>Graphics</category>
+  </categories>
   <screenshots>
     <screenshot type="default">
       <image>https://gitlab.gnome.org/bilelmoussaoui/heic2jpg/raw/master/data/resources/screenshots/screenshot1.png</image>

@@ -1,23 +1,29 @@
+use crate::config::{APP_ID, PROFILE};
+use crate::modals::about::AboutDialog;
+use crate::select_folder::{SelectFolder, SelectFolderOut};
+use gtk::prelude::*;
+use gtk::{gio, glib};
 use relm4::{
     actions::{RelmAction, RelmActionGroup},
     adw, gtk, main_application, Component, ComponentController, ComponentParts, ComponentSender,
     Controller, SimpleComponent,
 };
-
-use gtk::prelude::{
-    ApplicationExt, ApplicationWindowExt, GtkWindowExt, OrientableExt, SettingsExt, WidgetExt,
-};
-use gtk::{gio, glib};
-
-use crate::config::{APP_ID, PROFILE};
-use crate::modals::about::AboutDialog;
+use std::path::PathBuf;
 
 pub(super) struct App {
     about_dialog: Controller<AboutDialog>,
+    input_folder_selector: Controller<SelectFolder>,
+    output_folder_selector: Controller<SelectFolder>,
+    input_folder: Option<PathBuf>,
+    output_folder: Option<PathBuf>,
 }
 
 #[derive(Debug)]
 pub(super) enum AppMsg {
+    InputFolderSelected(PathBuf),
+    OutputFolderSelected(PathBuf),
+    DeselectInputFolder,
+    DeselectOutputFolder,
     Quit,
 }
 
@@ -70,18 +76,63 @@ impl SimpleComponent for App {
 
             gtk::Box {
                 set_orientation: gtk::Orientation::Vertical,
+                set_vexpand: true,
 
                 adw::HeaderBar {
+                    #[wrap(Some)]
+                    set_title_widget = &adw::WindowTitle {
+                        set_title: "Convert Heic to JPG",
+                    },
                     pack_end = &gtk::MenuButton {
                         set_icon_name: "open-menu-symbolic",
                         set_menu_model: Some(&primary_menu),
                     }
                 },
 
-                gtk::Label {
-                    set_label: "Hello world!",
-                    add_css_class: "title-header",
-                    set_vexpand: true,
+                // If no folder is selected, show the folder selector
+                if model.input_folder.is_none() {
+                    gtk::Box {
+                        set_vexpand: true,
+                        set_hexpand: true,
+                        append = model.input_folder_selector.widget(),
+                    }
+                } else {
+                    adw::StatusPage {
+                        set_hexpand: true,
+                        set_vexpand: true,
+                        set_title: "Select Output Folder",
+                        set_description: Some("Select the folder where the converted JPG files should be saved"),
+
+                        gtk::Box {
+                            set_orientation: gtk::Orientation::Vertical,
+                            set_spacing: 24,
+                            gtk::Label {
+                                set_halign: gtk::Align::Center,
+                                #[watch]
+                                set_text: &format!("Selected Input Folder: {}", model.input_folder.as_ref().map(|p| p.to_string_lossy()).unwrap_or_default())
+                            },
+                            gtk::Box {
+                                set_halign: gtk::Align::Center,
+                                set_orientation: gtk::Orientation::Horizontal,
+                                set_spacing: 24,
+                                gtk::Button {
+                                    set_halign: gtk::Align::Center,
+                                    set_label: "Select output directory",
+                                    connect_clicked[sender] => move |_| {
+
+                                    }
+                                },
+
+                                gtk::Button {
+                                    set_halign: gtk::Align::Center,
+                                    set_label: "Abort",
+                                    connect_clicked[sender] => move |_| {
+                                        sender.input(AppMsg::DeselectInputFolder);
+                                    }
+                                },
+                            }
+                        }
+                    }
                 }
             }
 
@@ -97,8 +148,27 @@ impl SimpleComponent for App {
             .transient_for(&root)
             .launch(())
             .detach();
+        let input_folder_selector =
+            SelectFolder::builder()
+                .launch(())
+                .forward(sender.input_sender(), |msg| match msg {
+                    SelectFolderOut::FolderSelected(path) => AppMsg::InputFolderSelected(path),
+                });
+                let output_folder_selector =
+                    SelectFolder::builder()
+                        .launch(())
+                        .forward(sender.input_sender(), |msg| match msg {
+                            SelectFolderOut::FolderSelected(path) => AppMsg::InputFolderSelected(path),
+                        });
 
-        let model = Self { about_dialog };
+
+        let model = Self {
+            about_dialog,
+            input_folder_selector,
+            output_folder_selector,
+            input_folder: None,
+            output_folder: None,
+        };
 
         let widgets = view_output!();
 
@@ -129,6 +199,10 @@ impl SimpleComponent for App {
 
     fn update(&mut self, message: Self::Input, _sender: ComponentSender<Self>) {
         match message {
+            AppMsg::InputFolderSelected(path) => self.input_folder = Some(path),
+            AppMsg::DeselectInputFolder => self.input_folder = None,
+            AppMsg::OutputFolderSelected(path) => self.output_folder = Some(path),
+            AppMsg::DeselectOutputFolder => self.output_folder = None,
             AppMsg::Quit => main_application().quit(),
         }
     }

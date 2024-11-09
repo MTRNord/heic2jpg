@@ -2,22 +2,31 @@
 mod config;
 mod app;
 mod modals;
+mod select_folder;
 
 use config::{APP_ID, GETTEXT_PACKAGE, LOCALEDIR, RESOURCES_FILE};
 use gettextrs::{gettext, LocaleCategory};
 use gtk::prelude::ApplicationExt;
 use gtk::{gio, glib};
+use magick_rust::magick_wand_genesis;
 use relm4::{
     actions::{AccelsPlus, RelmAction, RelmActionGroup},
     gtk, main_application, RelmApp,
 };
+use std::sync::Once;
 
 use app::App;
+use relm4::set_global_css;
 
 relm4::new_action_group!(AppActionGroup, "app");
 relm4::new_stateless_action!(QuitAction, AppActionGroup, "quit");
 
+static START_IMAGICK: Once = Once::new();
+
 fn main() {
+    START_IMAGICK.call_once(|| {
+        magick_wand_genesis();
+    });
     gtk::init().unwrap();
 
     // Enable logging
@@ -62,6 +71,6 @@ fn main() {
             gio::ResourceLookupFlags::NONE,
         )
         .unwrap();
-    app.set_global_css(&glib::GString::from_utf8_checked(data.to_vec()).unwrap());
+    set_global_css(&glib::GString::from_utf8_checked(data.to_vec()).unwrap());
     app.visible_on_activate(false).run::<App>(());
 }

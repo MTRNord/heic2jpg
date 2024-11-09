@@ -1,10 +1,10 @@
 [Desktop Entry]
 Name=Heic2JPG
-Comment=Write a GTK + Rust application
+Comment=An application to convert heic images to JPG images
 Type=Application
 Exec=heic2jpg
 Terminal=false
-Categories=GNOME;GTK;
+Categories=Graphics;
 # Translators: Search terms to find this application. Do NOT translate or localize the semicolons! The list MUST also end with a semicolon!
 Keywords=Gnome;GTK;
 # Translators: Do NOT translate or transliterate this text (this is an icon file name)!

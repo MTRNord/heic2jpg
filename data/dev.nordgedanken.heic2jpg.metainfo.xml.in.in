@@ -14,8 +14,8 @@
   </categories>
   <screenshots>
     <screenshot type="default">
-      <image>https://gitlab.gnome.org/bilelmoussaoui/heic2jpg/raw/master/data/resources/screenshots/screenshot1.png</image>
-      <caption>Main window</caption>
+      <image xml:lang="en">https://github.com/MTRNord/heic2jpg/raw/main/data/resources/screenshots/screenshot1.png</image>
+      <caption xml:lang="en">Main window</caption>
     </screenshot>
   </screenshots>
   <url type="homepage">https://github.com/MTRNord/heic2jpg</url>

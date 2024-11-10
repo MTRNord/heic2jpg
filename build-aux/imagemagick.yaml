@@ -12,3 +12,6 @@ sources:
     sha256: b2eb652d9221bdeb65772503891d8bfcfc36b3b1a2c9bb35b9d247a08965fd5d
 cleanup:
   - /share/doc
+modules:
+  - "./libde265.json"
+  - "./libheif.json"

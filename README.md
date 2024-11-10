@@ -2,6 +2,8 @@
 
 ## About
 
+![Screenshot of HEIC2JPG](data/resources/screenshots/screenshot1.png)
+
 HEIC2JPG is an application to batch convert HEIC images to JPG images. It is packaged as a Flatpak for easy installation and usage.
 
 ## Building the project

@@ -31,6 +31,7 @@ pub(super) struct App {
     mode: Mode,
     progress: f64,
     failure: Option<String>,
+    file_count: usize,
 }
 
 #[derive(Debug)]
@@ -40,6 +41,7 @@ pub(super) enum AppMsg {
     DeselectInputFolder,
     DeselectOutputFolder,
     Convert,
+    ConversionStarted(usize),
     ProgressUpdate(f64),
     ConversionComplete,
     ConversionFailed(String),
@@ -109,6 +111,7 @@ impl SimpleComponent for App {
                     }
                 },
 
+                #[transition = "SlideRight"]
                 match model.mode {
                     Mode::Progressing => {
                         adw::StatusPage {
@@ -116,10 +119,26 @@ impl SimpleComponent for App {
                             set_vexpand: true,
                             set_title: &gettext("Converting"),
                             set_description: Some(&gettext("Please wait while the conversion is in progress")),
+                            gtk::Box {
+                                set_halign: gtk::Align::Center,
+                                set_orientation: gtk::Orientation::Vertical,
+                                set_spacing: 24,
+                                gtk::ProgressBar {
+                                    #[watch]
+                                    set_fraction: model.progress,
+                                },
 
-                            gtk::ProgressBar {
-                                #[watch]
-                                set_fraction: model.progress,
+                                gtk::Text {
+                                    set_halign: gtk::Align::Center,
+                                    #[watch]
+                                    set_visible: model.file_count > 0,
+                                    #[watch]
+                                    set_text: &format!(
+                                        "{} / {}",
+                                        model.file_count as u32 * model.progress as u32,
+                                        model.file_count
+                                    ),
+                                }
                             }
                         }
                     }
@@ -129,11 +148,16 @@ impl SimpleComponent for App {
                             set_vexpand: true,
                             set_title: &gettext("Conversion Complete"),
                             set_description: Some(&gettext("The conversion was successful")),
+                            gtk::Box {
+                                set_halign: gtk::Align::Center,
+                                set_orientation: gtk::Orientation::Horizontal,
+                                set_spacing: 24,
 
-                            gtk::Button {
-                                set_label: "Close",
-                                connect_clicked[sender] => move |_| {
-                                    sender.input(AppMsg::Quit);
+                                gtk::Button {
+                                    set_label: "Close",
+                                    connect_clicked[sender] => move |_| {
+                                        sender.input(AppMsg::Quit);
+                                    }
                                 }
                             }
                         }
@@ -146,10 +170,15 @@ impl SimpleComponent for App {
                             #[watch]
                             set_description: model.failure.as_deref(),
 
-                            gtk::Button {
-                                set_label: &gettext("Close"),
-                                connect_clicked[sender] => move |_| {
-                                    sender.input(AppMsg::Quit);
+                            gtk::Box {
+                                set_halign: gtk::Align::Center,
+                                set_orientation: gtk::Orientation::Horizontal,
+                                set_spacing: 24,
+                                gtk::Button {
+                                    set_label: &gettext("Close"),
+                                    connect_clicked[sender] => move |_| {
+                                        sender.input(AppMsg::Quit);
+                                    }
                                 }
                             }
                         }
@@ -221,7 +250,9 @@ impl SimpleComponent for App {
             ConversionWorker::builder()
                 .detach_worker(())
                 .forward(sender.input_sender(), |msg| match msg {
-                    ConversionWorkerMsg::ConversionStarted => AppMsg::Noop,
+                    ConversionWorkerMsg::ConversionStarted(number) => {
+                        AppMsg::ConversionStarted(number)
+                    }
                     ConversionWorkerMsg::ProgressUpdate(number) => AppMsg::ProgressUpdate(number),
                     ConversionWorkerMsg::ConversionComplete => AppMsg::ConversionComplete,
                     ConversionWorkerMsg::ConversionFailed(e) => AppMsg::ConversionFailed(e),
@@ -237,6 +268,7 @@ impl SimpleComponent for App {
             mode: Mode::InputSelection,
             progress: 0.0,
             failure: None,
+            file_count: 0,
         };
 
         let widgets = view_output!();
@@ -268,6 +300,10 @@ impl SimpleComponent for App {
 
     fn update(&mut self, message: Self::Input, _sender: ComponentSender<Self>) {
         match message {
+            AppMsg::ConversionStarted(number) => {
+                self.file_count = number;
+                self.mode = Mode::Progressing;
+            }
             AppMsg::InputFolderSelected(path) => {
                 self.input_folder = Some(path);
                 self.mode = Mode::OutputSelection

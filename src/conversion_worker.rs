@@ -13,7 +13,7 @@ pub enum ConversionWorkerInputMsg {
 
 #[derive(Debug)]
 pub enum ConversionWorkerMsg {
-    ConversionStarted,
+    ConversionStarted(usize),
     ProgressUpdate(f64),
     ConversionComplete,
     ConversionFailed(String),
@@ -33,19 +33,9 @@ impl Worker for ConversionWorker {
     fn update(&mut self, msg: ConversionWorkerInputMsg, sender: ComponentSender<Self>) {
         match msg {
             ConversionWorkerInputMsg::ConvertFolder(input_path, output_path) => {
-                // Start the conversion
-                info!("Starting conversion of folder {:?}", input_path);
-                sender
-                    .output(ConversionWorkerMsg::ConversionStarted)
-                    .unwrap();
-
                 // Walk directory, find all heic files, convert them to jpg and update progress
                 info!("Converting folder {:?}", input_path);
-                let result = self.convert_folder(input_path, output_path, |progress| {
-                    sender
-                        .output(ConversionWorkerMsg::ProgressUpdate(progress))
-                        .unwrap();
-                });
+                let result = self.convert_folder(input_path, output_path, &sender);
 
                 // Send the result of the conversion back
                 match result {
@@ -62,21 +52,14 @@ impl Worker for ConversionWorker {
 }
 
 impl ConversionWorker {
-    fn convert_folder<F: Fn(f64)>(
+    fn convert_folder(
         &self,
         input_path: PathBuf,
         output_path: PathBuf,
-        progress_callback: F,
+        sender: &ComponentSender<Self>,
     ) -> Result<(), MagickError> {
+        // Start the conversion
         info!("Converting folder {:?} to {:?}", input_path, output_path);
-        // List files in folder for debugging
-        for entry in WalkDir::new(&input_path)
-            .follow_links(true)
-            .same_file_system(false)
-        {
-            let entry = entry.unwrap();
-            info!("Found {:?}", entry.path());
-        }
 
         // Use walkdir to find all heic files in the input directory
         let heic_files: Vec<PathBuf> = WalkDir::new(input_path)
@@ -86,7 +69,6 @@ impl ConversionWorker {
             .filter_map(|entry| {
                 let entry = entry.ok()?;
                 let path = entry.path();
-                info!("Checking file {:?}", path);
                 if path.is_file()
                     && path
                         .extension()
@@ -99,6 +81,9 @@ impl ConversionWorker {
             })
             .collect();
         info!("Found {} heic files", heic_files.len());
+        sender
+            .output(ConversionWorkerMsg::ConversionStarted(heic_files.len()))
+            .unwrap();
 
         // Convert each heic file to jpg
         for (index, heic_file) in heic_files.iter().enumerate() {
@@ -111,7 +96,11 @@ impl ConversionWorker {
             self.convert_heic_to_jpg(heic_file.to_path_buf(), output_file)?;
 
             // Update the progress
-            progress_callback((index + 1) as f64 / heic_files.len() as f64);
+            sender
+                .output(ConversionWorkerMsg::ProgressUpdate(
+                    (index + 1) as f64 / heic_files.len() as f64,
+                ))
+                .unwrap();
         }
         info!("Conversion complete");
         Ok(())

@@ -2,7 +2,9 @@ name: Flatter (Deploy)
 
 on:
   push:
-    branches: [main]
+    # Pattern matched against refs/tags
+    tags:
+      - "*"
   workflow_dispatch:
 
 jobs:

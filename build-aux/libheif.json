@@ -6,11 +6,7 @@
     },
     "config-opts": [
         "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
-        "-DWITH_EXAMPLES=0",
-        "-DWITH_X265=0",
-        "-DWITH_RAV1E=0",
-        "-DWITH_AOM=0",
-        "-DWITH_DAV1D=0"
+        "-DWITH_EXAMPLES=0"
     ],
     "sources": [
         {

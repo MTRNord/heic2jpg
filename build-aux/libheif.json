@@ -10,7 +10,10 @@
         "-DWITH_X265=0",
         "-DWITH_RAV1E=0",
         "-DWITH_AOM=0",
-        "-DWITH_DAV1D=0"
+        "-DWITH_DAV1D=0",
+        "-DCMAKE_COMPILE_WARNING_AS_ERROR=OFF",
+        "-DENABLE_PLUGIN_LOADING=OFF",
+        "-DWITH_OpenH264_DECODER=OFF"
     ],
     "sources": [
         {

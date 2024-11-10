@@ -87,7 +87,11 @@ impl ConversionWorker {
                 let entry = entry.ok()?;
                 let path = entry.path();
                 info!("Checking file {:?}", path);
-                if path.is_file() && path.extension().map_or(false, |ext| ext == "heic") {
+                if path.is_file()
+                    && path
+                        .extension()
+                        .map_or(false, |ext| ext.eq_ignore_ascii_case("heic"))
+                {
                     Some(path.to_path_buf())
                 } else {
                     None

@@ -36,6 +36,7 @@
         ]
     },
     "modules": [
+        "libde265.json",
         "./libheif.json",
         "./imagemagick.yaml",
         {

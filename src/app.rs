@@ -1,4 +1,5 @@
 use crate::config::{APP_ID, PROFILE};
+use crate::conversion_worker::{ConversionWorker, ConversionWorkerInputMsg, ConversionWorkerMsg};
 use crate::modals::about::AboutDialog;
 use crate::select_folder::{InOut, SelectFolder, SelectFolderOut};
 use gtk::prelude::*;
@@ -6,7 +7,7 @@ use gtk::{gio, glib};
 use relm4::{
     actions::{RelmAction, RelmActionGroup},
     adw, gtk, main_application, Component, ComponentController, ComponentParts, ComponentSender,
-    Controller, SimpleComponent,
+    Controller, SimpleComponent, WorkerController,
 };
 use std::path::PathBuf;
 
@@ -16,6 +17,7 @@ pub(super) struct App {
     output_folder_selector: Controller<SelectFolder>,
     input_folder: Option<PathBuf>,
     output_folder: Option<PathBuf>,
+    conversion_worker: WorkerController<ConversionWorker>,
 }
 
 #[derive(Debug)]
@@ -24,6 +26,7 @@ pub(super) enum AppMsg {
     OutputFolderSelected(PathBuf),
     DeselectInputFolder,
     DeselectOutputFolder,
+    Convert,
     Quit,
     Noop,
 }
@@ -105,8 +108,7 @@ impl SimpleComponent for App {
                             gtk::Button {
                                 set_label: "Convert",
                                 connect_clicked[sender] => move |_| {
-                                    // TODO: Implement conversion using worker and imagick
-                                    sender.input(AppMsg::Quit);
+                                    sender.input(AppMsg::Convert);
                                 }
                             }
                         }
@@ -153,11 +155,21 @@ impl SimpleComponent for App {
                     SelectFolderOut::FolderSelected(path) => AppMsg::OutputFolderSelected(path),
                     SelectFolderOut::AbortLast => AppMsg::DeselectInputFolder,
                 });
+        let conversion_worker =
+            ConversionWorker::builder()
+                .detach_worker(())
+                .forward(sender.input_sender(), |msg| match msg {
+                    ConversionWorkerMsg::ConversionStarted => AppMsg::Noop,
+                    ConversionWorkerMsg::ProgressUpdate(_) => AppMsg::Noop,
+                    ConversionWorkerMsg::ConversionComplete => AppMsg::Noop,
+                    ConversionWorkerMsg::ConversionFailed(_) => AppMsg::Noop,
+                });
 
         let model = Self {
             about_dialog,
             input_folder_selector,
             output_folder_selector,
+            conversion_worker,
             input_folder: None,
             output_folder: None,
         };
@@ -196,6 +208,18 @@ impl SimpleComponent for App {
             AppMsg::OutputFolderSelected(path) => self.output_folder = Some(path),
             AppMsg::DeselectOutputFolder => self.output_folder = None,
             AppMsg::Quit => main_application().quit(),
+            AppMsg::Convert => {
+                if let (Some(input_folder), Some(output_folder)) =
+                    (&self.input_folder, &self.output_folder)
+                {
+                    let _ = self.conversion_worker.sender().send(
+                        ConversionWorkerInputMsg::ConvertFolder(
+                            input_folder.clone(),
+                            output_folder.clone(),
+                        ),
+                    );
+                }
+            }
             AppMsg::Noop => {}
         }
     }

@@ -3,7 +3,7 @@ use relm4::{
     adw, gtk, Component, ComponentController, ComponentParts, ComponentSender, Controller,
     SimpleComponent,
 };
-use relm4_components::{open_dialog::*, save_dialog::*};
+use relm4_components::open_dialog::*;
 use std::path::PathBuf;
 
 #[derive(Debug, PartialEq)]

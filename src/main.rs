@@ -1,6 +1,7 @@
 #[rustfmt::skip]
 mod config;
 mod app;
+mod conversion_worker;
 mod modals;
 mod select_folder;
 

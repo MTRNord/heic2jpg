@@ -28,7 +28,7 @@ jobs:
       options: --privileged
     steps:
       - uses: actions/checkout@v4
-      - uses: bilelmoussaoui/flatpak-github-actions/flatpak-builder@v6
+      - uses: flatpak/flatpak-github-actions/flatpak-builder@v6
         with:
           bundle: heic2jpg.flatpak
           manifest-path: build-aux/dev.nordgedanken.heic2jpg.Devel.json

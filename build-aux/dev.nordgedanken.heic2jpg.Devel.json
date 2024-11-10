@@ -36,6 +36,7 @@
         ]
     },
     "modules": [
+        "./libheif.json",
         "./imagemagick.yaml",
         {
             "name": "heic2jpg",

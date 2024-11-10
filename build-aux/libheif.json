@@ -1,0 +1,22 @@
+{
+    "name": "libheif",
+    "buildsystem": "cmake-ninja",
+    "build-options": {
+        "cxxflags": "-Wno-error=maybe-uninitialized"
+    },
+    "config-opts": [
+        "-DCMAKE_BUILD_TYPE=RelWithDebInfo",
+        "-DWITH_EXAMPLES=0",
+        "-DWITH_X265=0",
+        "-DWITH_RAV1E=0",
+        "-DWITH_AOM=0",
+        "-DWITH_DAV1D=0"
+    ],
+    "sources": [
+        {
+            "type": "archive",
+            "url": "https://github.com/strukturag/libheif/archive/v1.13.0.tar.gz",
+            "sha256": "50def171af4bc8991211d6027f3cee4200a86bbe60fddb537799205bf216ddca"
+        }
+    ]
+}

@@ -5,6 +5,7 @@ config-opts:
   - --with-modules
   - --with-gslib
   - --with-wmf
+  - --with-heic=yes
 sources:
   - type: archive
     url: https://github.com/ImageMagick/ImageMagick/archive/refs/tags/7.1.1-39.tar.gz

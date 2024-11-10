@@ -23,7 +23,7 @@ jobs:
         uses: andyholmes/flatter@main
         with:
           files: |
-            build-aux/flatpak/dev.nordgedanken.heic2jpg.Devel.json
+            build-aux/dev.nordgedanken.heic2jpg.Devel.json
           upload-pages-artifact: true
 
   deploy:

@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: heic2jpg main\n"
 "Report-Msgid-Bugs-To: https://github.com/MTRNord/heic2jpg/issues\n"
-"POT-Creation-Date: 2024-11-10 14:37+0100\n"
-"PO-Revision-Date: 2024-11-10 14:38+0100\n"
+"POT-Creation-Date: 2024-11-10 14:59+0100\n"
+"PO-Revision-Date: 2024-11-10 14:59+0100\n"
 "Last-Translator: MTRNord <mtrnord@nordgedanken.dev>\n"
 "Language-Team: \n"
 "Language: en\n"
@@ -89,35 +89,35 @@ msgstr "Converting"
 msgid "Please wait while the conversion is in progress"
 msgstr "Please wait while the conversion is in progress"
 
-#: src/app.rs:129
+#: src/app.rs:130
 msgid "Conversion Complete"
 msgstr "Conversion Complete"
 
-#: src/app.rs:130
+#: src/app.rs:131
 msgid "The conversion was successful"
 msgstr "The conversion was successful"
 
-#: src/app.rs:144
+#: src/app.rs:145
 msgid "Conversion Failed"
 msgstr "Conversion Failed"
 
-#: src/app.rs:148
+#: src/app.rs:150
 msgid "Close"
 msgstr "Close"
 
-#: src/app.rs:173
+#: src/app.rs:175
 msgid "Start Conversion"
 msgstr "Start Conversion"
 
-#: src/app.rs:174
+#: src/app.rs:176
 msgid "Click the button below to start the conversion"
 msgstr "Click the button below to start the conversion"
 
-#: src/app.rs:181
+#: src/app.rs:183
 msgid "Convert"
 msgstr "Convert"
 
-#: src/app.rs:300
+#: src/app.rs:302
 msgid "Please select both input and output folders"
 msgstr "Please select both input and output folders"
 

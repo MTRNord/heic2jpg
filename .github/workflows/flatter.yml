@@ -20,7 +20,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build
-        uses: andyholmes/actions/flatter@main
+        uses: andyholmes/flatter@main
         with:
           files: |
             build-aux/flatpak/dev.nordgedanken.heic2jpg.Devel.json

@@ -2,6 +2,7 @@ use crate::config::{APP_ID, PROFILE};
 use crate::conversion_worker::{ConversionWorker, ConversionWorkerInputMsg, ConversionWorkerMsg};
 use crate::modals::about::AboutDialog;
 use crate::select_folder::{InOut, SelectFolder, SelectFolderOut};
+use gettextrs::gettext;
 use gtk::prelude::*;
 use gtk::{gio, glib};
 use relm4::{
@@ -11,6 +12,15 @@ use relm4::{
 };
 use std::path::PathBuf;
 
+enum Mode {
+    InputSelection,
+    OutputSelection,
+    ConversionSelection,
+    Progressing,
+    Finished,
+    Failed,
+}
+
 pub(super) struct App {
     about_dialog: Controller<AboutDialog>,
     input_folder_selector: Controller<SelectFolder>,
@@ -18,6 +28,9 @@ pub(super) struct App {
     input_folder: Option<PathBuf>,
     output_folder: Option<PathBuf>,
     conversion_worker: WorkerController<ConversionWorker>,
+    mode: Mode,
+    progress: f64,
+    failure: Option<String>,
 }
 
 #[derive(Debug)]
@@ -27,6 +40,9 @@ pub(super) enum AppMsg {
     DeselectInputFolder,
     DeselectOutputFolder,
     Convert,
+    ProgressUpdate(f64),
+    ConversionComplete,
+    ConversionFailed(String),
     Quit,
     Noop,
 }
@@ -85,7 +101,7 @@ impl SimpleComponent for App {
                 adw::HeaderBar {
                     #[wrap(Some)]
                     set_title_widget = &adw::WindowTitle {
-                        set_title: "Convert Heic to JPG",
+                        set_title: &gettext("Convert Heic to JPG"),
                     },
                     pack_end = &gtk::MenuButton {
                         set_icon_name: "open-menu-symbolic",
@@ -93,40 +109,86 @@ impl SimpleComponent for App {
                     }
                 },
 
-                // If no folder is selected, show the folder selector
-                if model.input_folder.is_some() && model.output_folder.is_some() {
-                    adw::StatusPage {
-                        set_hexpand: true,
-                        set_vexpand: true,
-                        set_title: "Start Conversion",
-                        set_description: Some("Press the button to start the conversion"),
+                match model.mode {
+                    Mode::Progressing => {
+                        adw::StatusPage {
+                            set_hexpand: true,
+                            set_vexpand: true,
+                            set_title: &gettext("Converting"),
+                            set_description: Some(&gettext("Please wait while the conversion is in progress")),
 
-                        gtk::Box {
-                            set_halign: gtk::Align::Center,
-                            set_orientation: gtk::Orientation::Horizontal,
-                            set_spacing: 24,
+                            gtk::ProgressBar {
+                                #[watch]
+                                set_fraction: model.progress,
+                            }
+                        }
+                    }
+                    Mode::Finished => {
+                        adw::StatusPage {
+                            set_hexpand: true,
+                            set_vexpand: true,
+                            set_title: &gettext("Conversion Complete"),
+                            set_description: Some(&gettext("The conversion was successful")),
+
                             gtk::Button {
-                                set_label: "Convert",
+                                set_label: "Close",
                                 connect_clicked[sender] => move |_| {
-                                    sender.input(AppMsg::Convert);
+                                    sender.input(AppMsg::Quit);
                                 }
                             }
                         }
                     }
-                } else if model.input_folder.is_none() {
-                    gtk::Box {
-                        set_vexpand: true,
-                        set_hexpand: true,
-                        append = model.input_folder_selector.widget(),
+                    Mode::Failed => {
+                        adw::StatusPage {
+                            set_hexpand: true,
+                            set_vexpand: true,
+                            set_title: &gettext("Conversion Failed"),
+                            #[watch]
+                            set_description: model.failure.as_deref(),
+
+                            gtk::Button {
+                                set_label: &gettext("Close"),
+                                connect_clicked[sender] => move |_| {
+                                    sender.input(AppMsg::Quit);
+                                }
+                            }
+                        }
                     }
-                } else {
-                    gtk::Box {
-                        set_vexpand: true,
-                        set_hexpand: true,
-                        append = model.output_folder_selector.widget(),
+                    Mode::InputSelection => {
+                        gtk::Box {
+                            set_vexpand: true,
+                            set_hexpand: true,
+                            append = model.input_folder_selector.widget(),
+                        }
+                    }
+                    Mode::OutputSelection => {
+                        gtk::Box {
+                            set_vexpand: true,
+                            set_hexpand: true,
+                            append = model.output_folder_selector.widget(),
+                        }
+                    }
+                    Mode::ConversionSelection => {
+                        adw::StatusPage {
+                            set_hexpand: true,
+                            set_vexpand: true,
+                            set_title: &gettext("Start Conversion"),
+                            set_description: Some(&gettext("Click the button below to start the conversion")),
+
+                            gtk::Box {
+                                set_halign: gtk::Align::Center,
+                                set_orientation: gtk::Orientation::Horizontal,
+                                set_spacing: 24,
+                                gtk::Button {
+                                    set_label: &gettext("Convert"),
+                                    connect_clicked[sender] => move |_| {
+                                        sender.input(AppMsg::Convert);
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
-
             }
 
         }
@@ -160,9 +222,9 @@ impl SimpleComponent for App {
                 .detach_worker(())
                 .forward(sender.input_sender(), |msg| match msg {
                     ConversionWorkerMsg::ConversionStarted => AppMsg::Noop,
-                    ConversionWorkerMsg::ProgressUpdate(_) => AppMsg::Noop,
-                    ConversionWorkerMsg::ConversionComplete => AppMsg::Noop,
-                    ConversionWorkerMsg::ConversionFailed(_) => AppMsg::Noop,
+                    ConversionWorkerMsg::ProgressUpdate(number) => AppMsg::ProgressUpdate(number),
+                    ConversionWorkerMsg::ConversionComplete => AppMsg::ConversionComplete,
+                    ConversionWorkerMsg::ConversionFailed(e) => AppMsg::ConversionFailed(e),
                 });
 
         let model = Self {
@@ -172,6 +234,9 @@ impl SimpleComponent for App {
             conversion_worker,
             input_folder: None,
             output_folder: None,
+            mode: Mode::InputSelection,
+            progress: 0.0,
+            failure: None,
         };
 
         let widgets = view_output!();
@@ -203,10 +268,22 @@ impl SimpleComponent for App {
 
     fn update(&mut self, message: Self::Input, _sender: ComponentSender<Self>) {
         match message {
-            AppMsg::InputFolderSelected(path) => self.input_folder = Some(path),
-            AppMsg::DeselectInputFolder => self.input_folder = None,
-            AppMsg::OutputFolderSelected(path) => self.output_folder = Some(path),
-            AppMsg::DeselectOutputFolder => self.output_folder = None,
+            AppMsg::InputFolderSelected(path) => {
+                self.input_folder = Some(path);
+                self.mode = Mode::OutputSelection
+            }
+            AppMsg::DeselectInputFolder => {
+                self.input_folder = None;
+                self.mode = Mode::InputSelection
+            }
+            AppMsg::OutputFolderSelected(path) => {
+                self.output_folder = Some(path);
+                self.mode = Mode::ConversionSelection
+            }
+            AppMsg::DeselectOutputFolder => {
+                self.output_folder = None;
+                self.mode = Mode::OutputSelection
+            }
             AppMsg::Quit => main_application().quit(),
             AppMsg::Convert => {
                 if let (Some(input_folder), Some(output_folder)) =
@@ -218,7 +295,24 @@ impl SimpleComponent for App {
                             output_folder.clone(),
                         ),
                     );
+                    self.mode = Mode::Progressing;
+                } else {
+                    self.mode = Mode::Failed;
+                    self.failure =
+                        Some(gettext("Please select both input and output folders").to_string());
                 }
+            }
+            AppMsg::ProgressUpdate(progress) => {
+                if let Mode::Progressing = self.mode {
+                    self.progress = progress;
+                }
+            }
+            AppMsg::ConversionComplete => {
+                self.mode = Mode::Finished;
+            }
+            AppMsg::ConversionFailed(e) => {
+                self.mode = Mode::Failed;
+                self.failure = Some(e);
             }
             AppMsg::Noop => {}
         }

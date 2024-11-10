@@ -3,12 +3,11 @@
 <component type="desktop-application">
   <id>@app-id@</id>
   <metadata_license>CC0</metadata_license>
-  <!-- Insert your license of choice here -->
-  <!-- <project_license>MIT</project_license> -->
+  <project_license>AGPL-3.0</project_license>
   <name>Heic2JPG</name>
-  <summary>Write a GTK + Rust application</summary>
+  <summary>A small app to batch convert heic images to jpg</summary>
   <description>
-    <p>A boilerplate template for GTK + Rust. It uses Meson as a build system and has flatpak support by default.</p>
+    <p>A small app to batch convert heic images to jpg.</p>
   </description>
   <categories>
     <category>Graphics</category>
@@ -19,8 +18,8 @@
       <caption>Main window</caption>
     </screenshot>
   </screenshots>
-  <url type="homepage">https://gitlab.gnome.org/bilelmoussaoui/heic2jpg</url>
-  <url type="bugtracker">https://gitlab.gnome.org/bilelmoussaoui/heic2jpg/issues</url>
+  <url type="homepage">https://github.com/MTRNord/heic2jpg</url>
+  <url type="bugtracker">https://github.com/MTRNord/heic2jpg/issues</url>
   <content_rating type="oars-1.1" />
   <releases>
     <release version="0.1.0" date="2019-07-11" />

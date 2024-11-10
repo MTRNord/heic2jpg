@@ -6,7 +6,7 @@ mod modals;
 mod select_folder;
 
 use config::{APP_ID, GETTEXT_PACKAGE, LOCALEDIR, RESOURCES_FILE};
-use gettextrs::{gettext, LocaleCategory};
+use gettextrs::LocaleCategory;
 use gtk::prelude::ApplicationExt;
 use gtk::{gio, glib};
 use magick_rust::magick_wand_genesis;
@@ -41,7 +41,7 @@ fn main() {
     gettextrs::bindtextdomain(GETTEXT_PACKAGE, LOCALEDIR).expect("Unable to bind the text domain");
     gettextrs::textdomain(GETTEXT_PACKAGE).expect("Unable to switch to the text domain");
 
-    glib::set_application_name(&gettext("Heic2JPG"));
+    glib::set_application_name("Heic2JPG");
 
     let res = gio::Resource::load(RESOURCES_FILE).expect("Could not load gresource file");
     gio::resources_register(&res);

@@ -1,3 +1,4 @@
+use gettextrs::gettext;
 use gtk::prelude::*;
 use relm4::{
     adw, gtk, Component, ComponentController, ComponentParts, ComponentSender, Controller,
@@ -44,7 +45,7 @@ impl SimpleComponent for SelectFolder {
         adw::StatusPage {
             set_hexpand: true,
             set_vexpand: true,
-            set_title: "Select Folder",
+            set_title: &gettext("Select Folder"),
             set_description: Some(&model.description),
 
             gtk::Box {
@@ -64,7 +65,7 @@ impl SimpleComponent for SelectFolder {
                 gtk::Button {
                     set_visible: model.direction == InOut::Output,
                     set_halign: gtk::Align::Center,
-                    set_label: "Abort",
+                    set_label: &gettext("Abort"),
                     connect_clicked[sender] => move |_| {
                         let _ = sender.output(SelectFolderOut::AbortLast);
                     }
@@ -80,12 +81,12 @@ impl SimpleComponent for SelectFolder {
     ) -> ComponentParts<Self> {
         let (description, button_label) = match init {
             InOut::Input => (
-                "Select the folder where the Heic files can be found",
-                "Select input directory",
+                gettext("Select the folder where the Heic files can be found"),
+                gettext("Select input directory"),
             ),
             InOut::Output => (
-                "Select the folder where the JPG files are meant to be saved",
-                "Select output directory",
+                gettext("Select the folder where the JPG files are meant to be saved"),
+                gettext("Select output directory"),
             ),
         };
 

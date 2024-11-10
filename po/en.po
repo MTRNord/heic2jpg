@@ -1,0 +1,146 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: heic2jpg main\n"
+"Report-Msgid-Bugs-To: https://github.com/MTRNord/heic2jpg/issues\n"
+"POT-Creation-Date: 2024-11-10 14:37+0100\n"
+"PO-Revision-Date: 2024-11-10 14:38+0100\n"
+"Last-Translator: MTRNord <mtrnord@nordgedanken.dev>\n"
+"Language-Team: \n"
+"Language: en\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Poedit 3.4.4\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+
+#: data/dev.nordgedanken.heic2jpg.desktop.in.in:3
+#: data/dev.nordgedanken.heic2jpg.metainfo.xml.in.in:7
+msgid "Heic2JPG"
+msgstr "Heic2JPG"
+
+#: data/dev.nordgedanken.heic2jpg.desktop.in.in:4
+msgid "An application to convert heic images to JPG images"
+msgstr "An application to convert heic images to JPG images"
+
+#: data/dev.nordgedanken.heic2jpg.desktop.in.in:10
+msgid "Gnome;GTK;"
+msgstr "Gnome;GTK;"
+
+#: data/dev.nordgedanken.heic2jpg.gschema.xml.in:6
+msgid "Window width"
+msgstr "Window width"
+
+#: data/dev.nordgedanken.heic2jpg.gschema.xml.in:10
+msgid "Window height"
+msgstr "Window height"
+
+#: data/dev.nordgedanken.heic2jpg.gschema.xml.in:14
+msgid "Window maximized state"
+msgstr "Window maximized state"
+
+#: data/dev.nordgedanken.heic2jpg.metainfo.xml.in.in:8
+msgid "A small app to batch convert heic images to jpg"
+msgstr "A small app to batch convert heic images to jpg"
+
+#: data/dev.nordgedanken.heic2jpg.metainfo.xml.in.in:10
+msgid "A small app to batch convert heic images to jpg."
+msgstr "A small app to batch convert heic images to jpg."
+
+#: data/dev.nordgedanken.heic2jpg.metainfo.xml.in.in:18
+msgid "Main window"
+msgstr "Main window"
+
+#. developer_name tag deprecated with Appstream 1.0
+#: data/dev.nordgedanken.heic2jpg.metainfo.xml.in.in:36
+#: data/dev.nordgedanken.heic2jpg.metainfo.xml.in.in:39
+msgid "MTRNord"
+msgstr "MTRNord"
+
+#: data/resources/ui/shortcuts.ui:11
+msgctxt "shortcut window"
+msgid "General"
+msgstr "General"
+
+#: data/resources/ui/shortcuts.ui:14
+msgctxt "shortcut window"
+msgid "Show Shortcuts"
+msgstr "Show Shortcuts"
+
+#: data/resources/ui/shortcuts.ui:20
+msgctxt "shortcut window"
+msgid "Quit"
+msgstr "Quit"
+
+#: src/app.rs:104
+msgid "Convert Heic to JPG"
+msgstr "Convert Heic to JPG"
+
+#: src/app.rs:117
+msgid "Converting"
+msgstr "Converting"
+
+#: src/app.rs:118
+msgid "Please wait while the conversion is in progress"
+msgstr "Please wait while the conversion is in progress"
+
+#: src/app.rs:129
+msgid "Conversion Complete"
+msgstr "Conversion Complete"
+
+#: src/app.rs:130
+msgid "The conversion was successful"
+msgstr "The conversion was successful"
+
+#: src/app.rs:144
+msgid "Conversion Failed"
+msgstr "Conversion Failed"
+
+#: src/app.rs:148
+msgid "Close"
+msgstr "Close"
+
+#: src/app.rs:173
+msgid "Start Conversion"
+msgstr "Start Conversion"
+
+#: src/app.rs:174
+msgid "Click the button below to start the conversion"
+msgstr "Click the button below to start the conversion"
+
+#: src/app.rs:181
+msgid "Convert"
+msgstr "Convert"
+
+#: src/app.rs:300
+msgid "Please select both input and output folders"
+msgstr "Please select both input and output folders"
+
+#: src/select_folder.rs:48
+msgid "Select Folder"
+msgstr "Select Folder"
+
+#: src/select_folder.rs:68
+msgid "Abort"
+msgstr "Abort"
+
+#: src/select_folder.rs:84
+msgid "Select the folder where the Heic files can be found"
+msgstr "Select the folder where the Heic files can be found"
+
+#: src/select_folder.rs:85
+msgid "Select input directory"
+msgstr "Select input directory"
+
+#: src/select_folder.rs:88
+msgid "Select the folder where the JPG files are meant to be saved"
+msgstr "Select the folder where the JPG files are meant to be saved"
+
+#: src/select_folder.rs:89
+msgid "Select output directory"
+msgstr "Select output directory"

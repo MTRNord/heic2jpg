@@ -2,5 +2,9 @@ data/dev.nordgedanken.heic2jpg.desktop.in.in
 data/dev.nordgedanken.heic2jpg.gschema.xml.in
 data/dev.nordgedanken.heic2jpg.metainfo.xml.in.in
 data/resources/ui/shortcuts.ui
-data/resources/ui/window.ui
-src/application.rs
+src/app.rs
+src/main.rs
+src/select_folder.rs
+src/conversion_worker.rs
+src/modals/about.rs
+src/modals/mod.rs

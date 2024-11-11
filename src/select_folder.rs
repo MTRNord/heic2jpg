@@ -56,6 +56,8 @@ impl SimpleComponent for SelectFolder {
                 gtk::Button {
                     set_halign: gtk::Align::Center,
                     set_label: &model.button_label,
+                    add_css_class: "suggested-action",
+                    add_css_class: "pill",
                     connect_clicked[sender] => move |_| {
                         sender.input(SelectFolderMsg::OpenRequest);
                     }

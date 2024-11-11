@@ -155,6 +155,8 @@ impl SimpleComponent for App {
 
                                 gtk::Button {
                                     set_label: "Close",
+                                    add_css_class: "suggested-action",
+                                    add_css_class: "pill",
                                     connect_clicked[sender] => move |_| {
                                         sender.input(AppMsg::Quit);
                                     }
@@ -210,6 +212,8 @@ impl SimpleComponent for App {
                                 set_spacing: 24,
                                 gtk::Button {
                                     set_label: &gettext("Convert"),
+                                    add_css_class: "suggested-action",
+                                    add_css_class: "pill",
                                     connect_clicked[sender] => move |_| {
                                         sender.input(AppMsg::Convert);
                                     }

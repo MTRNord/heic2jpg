@@ -15,17 +15,13 @@ impl SimpleComponent for AboutDialog {
     fn init_root() -> Self::Root {
         adw::AboutWindow::builder()
             .application_icon(APP_ID)
-            // Insert your license of choice here
-            // .license_type(gtk::License::MitX11)
-            // Insert your website here
-            // .website("https://gitlab.gnome.org/bilelmoussaoui/heic2jpg/")
-            // Insert your Issues page
-            // .issue_url("https://gitlab.gnome.org/World/Rust/heic2jpg/-/issues")
-            // Insert your application name here
-            .application_name("Relm4-template")
+            .license_type(gtk::License::Agpl30)
+            .website("https://github.com/MTRNord/heic2jpg")
+            .issue_url("https://github.com/MTRNord/heic2jpg/issues")
+            .application_name("Heic2JPG")
             .version(VERSION)
             .translator_credits("translator-credits")
-            .copyright("© 2023 MTRNord")
+            .copyright("© 2024 MTRNord")
             .developers(vec!["MTRNord"])
             .designers(vec!["MTRNord"])
             .hide_on_close(true)

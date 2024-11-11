@@ -5,10 +5,11 @@ use crate::select_folder::{InOut, SelectFolder, SelectFolderOut};
 use gettextrs::gettext;
 use gtk::prelude::*;
 use gtk::{gio, glib};
+use relm4::SimpleComponent;
 use relm4::{
     actions::{RelmAction, RelmActionGroup},
     adw, gtk, main_application, Component, ComponentController, ComponentParts, ComponentSender,
-    Controller, SimpleComponent, WorkerController,
+    Controller, WorkerController,
 };
 use std::path::PathBuf;
 
@@ -45,6 +46,7 @@ pub(super) enum AppMsg {
     ProgressUpdate(f64),
     ConversionComplete,
     ConversionFailed(String),
+    StartOver,
     Quit,
     Noop,
 }
@@ -72,8 +74,10 @@ impl SimpleComponent for App {
     }
 
     view! {
+        #[root]
         main_window = adw::ApplicationWindow::new(&main_application()) {
             set_visible: true,
+            set_resizable: true,
 
             connect_close_request[sender] => move |_| {
                 sender.input(AppMsg::Quit);
@@ -120,22 +124,23 @@ impl SimpleComponent for App {
                             gtk::Box {
                                 set_halign: gtk::Align::Center,
                                 set_orientation: gtk::Orientation::Vertical,
-                                set_spacing: 24,
-                                gtk::ProgressBar {
-                                    #[watch]
-                                    set_fraction: model.progress,
-                                },
+                                set_spacing: 8,
 
-                                gtk::Text {
-                                    set_halign: gtk::Align::Center,
+                                gtk::Label {
+                                    set_xalign: 0.5,
                                     #[watch]
                                     set_visible: model.file_count > 0,
                                     #[watch]
-                                    set_text: &format!(
+                                    set_label: &format!(
                                         "{} / {}",
                                         model.file_count as u32 * model.progress as u32,
                                         model.file_count
                                     ),
+                                },
+                                gtk::ProgressBar {
+                                    set_hexpand: true,
+                                    #[watch]
+                                    set_fraction: model.progress,
                                 }
                             }
                         }
@@ -158,6 +163,12 @@ impl SimpleComponent for App {
                                     connect_clicked[sender] => move |_| {
                                         sender.input(AppMsg::Quit);
                                     }
+                                },
+                                gtk::Button {
+                                    set_label: "Restart",
+                                    connect_clicked[sender] => move |_| {
+                                        sender.input(AppMsg::StartOver);
+                                    }
                                 }
                             }
                         }
@@ -178,6 +189,12 @@ impl SimpleComponent for App {
                                     set_label: &gettext("Close"),
                                     connect_clicked[sender] => move |_| {
                                         sender.input(AppMsg::Quit);
+                                    }
+                                },
+                                gtk::Button {
+                                    set_label: "Restart",
+                                    connect_clicked[sender] => move |_| {
+                                        sender.input(AppMsg::StartOver);
                                     }
                                 }
                             }
@@ -214,6 +231,12 @@ impl SimpleComponent for App {
                                     add_css_class: "pill",
                                     connect_clicked[sender] => move |_| {
                                         sender.input(AppMsg::Convert);
+                                    }
+                                },
+                                gtk::Button {
+                                    set_label: "Restart",
+                                    connect_clicked[sender] => move |_| {
+                                        sender.input(AppMsg::StartOver);
                                     }
                                 }
                             }
@@ -347,10 +370,25 @@ impl SimpleComponent for App {
             }
             AppMsg::ConversionComplete => {
                 self.mode = Mode::Finished;
+                let notification = gio::Notification::new(&gettext("Conversion Complete"));
+                notification.set_body(Some(&gettext("The conversion was successful")));
+                notification.set_category(Some("transfer.complete"));
+                notification.set_priority(gio::NotificationPriority::Normal);
+
+                let app = relm4::main_application();
+                app.send_notification(None, &notification);
             }
             AppMsg::ConversionFailed(e) => {
                 self.mode = Mode::Failed;
                 self.failure = Some(e);
+            }
+            AppMsg::StartOver => {
+                self.input_folder = None;
+                self.output_folder = None;
+                self.progress = 0.0;
+                self.failure = None;
+                self.file_count = 0;
+                self.mode = Mode::InputSelection;
             }
             AppMsg::Noop => {}
         }

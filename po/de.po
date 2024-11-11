@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: heic2jpg main\n"
 "Report-Msgid-Bugs-To: https://github.com/MTRNord/heic2jpg/issues\n"
-"POT-Creation-Date: 2024-11-10 14:37+0100\n"
-"PO-Revision-Date: 2024-11-10 14:38+0100\n"
+"POT-Creation-Date: 2024-11-11 21:54+0100\n"
+"PO-Revision-Date: 2024-11-11 21:56+0100\n"
 "Last-Translator: MTRNord <mtrnord@nordgedanken.dev>\n"
 "Language-Team: \n"
 "Language: de_DE\n"
@@ -45,12 +45,16 @@ msgid "Window maximized state"
 msgstr "Fenster Maximierungszustand"
 
 #: data/dev.nordgedanken.heic2jpg.metainfo.xml.in.in:8
-msgid "A small app to batch convert heic images to jpg"
-msgstr "Eine kleine Anwendung um viele heic bilder nach jpg umzuwandeln"
-
-#: data/dev.nordgedanken.heic2jpg.metainfo.xml.in.in:10
 msgid "A small app to batch convert heic images to jpg."
 msgstr "Eine kleine Anwendung um viele heic bilder nach jpg umzuwandeln."
+
+#: data/dev.nordgedanken.heic2jpg.metainfo.xml.in.in:10
+msgid ""
+"A small app to batch convert heic images to jpg from an input folder to an "
+"output folder."
+msgstr ""
+"Eine kleine Anwendung um viele HEIC Bilder aus einem Ordner nach JPG in "
+"einem anderen Ordner umzuwandeln."
 
 #: data/dev.nordgedanken.heic2jpg.metainfo.xml.in.in:18
 msgid "Main window"
@@ -77,47 +81,47 @@ msgctxt "shortcut window"
 msgid "Quit"
 msgstr "Beenden"
 
-#: src/app.rs:104
+#: src/app.rs:108
 msgid "Convert Heic to JPG"
 msgstr "Wandle Heic nach JPG"
 
-#: src/app.rs:117
+#: src/app.rs:122
 msgid "Converting"
 msgstr "Umwandeln"
 
-#: src/app.rs:118
+#: src/app.rs:123
 msgid "Please wait while the conversion is in progress"
 msgstr "Bitte warte während die Umwandlung stattfindet"
 
-#: src/app.rs:129
+#: src/app.rs:152 src/app.rs:373
 msgid "Conversion Complete"
 msgstr "Umwandlung vollständig"
 
-#: src/app.rs:130
+#: src/app.rs:153 src/app.rs:374
 msgid "The conversion was successful"
 msgstr "Die Umwandlung war erfolgreich"
 
-#: src/app.rs:144
+#: src/app.rs:180
 msgid "Conversion Failed"
 msgstr "Umwandlung fehlgeschlagen"
 
-#: src/app.rs:148
+#: src/app.rs:189
 msgid "Close"
 msgstr "Schließen"
 
-#: src/app.rs:173
+#: src/app.rs:221
 msgid "Start Conversion"
 msgstr "Umwandlung beginnen"
 
-#: src/app.rs:174
+#: src/app.rs:222
 msgid "Click the button below to start the conversion"
 msgstr "Drücke den Knopf um die Umwandlung zu beginnen"
 
-#: src/app.rs:181
+#: src/app.rs:229
 msgid "Convert"
 msgstr "Umwandeln"
 
-#: src/app.rs:300
+#: src/app.rs:363
 msgid "Please select both input and output folders"
 msgstr "Bitte wähle sowohl Eingabe- als auch Ausgabe-Ordner aus"
 
@@ -125,22 +129,22 @@ msgstr "Bitte wähle sowohl Eingabe- als auch Ausgabe-Ordner aus"
 msgid "Select Folder"
 msgstr "Verzeichnis wählen"
 
-#: src/select_folder.rs:68
-msgid "Abort"
-msgstr "Abbrechen"
+#: src/select_folder.rs:70
+msgid "Restart"
+msgstr "Von vorne beginnen"
 
-#: src/select_folder.rs:84
+#: src/select_folder.rs:87
 msgid "Select the folder where the Heic files can be found"
 msgstr "Wähle einen Ordner in dem sich die Heic Dateien befinden"
 
-#: src/select_folder.rs:85
+#: src/select_folder.rs:88
 msgid "Select input directory"
 msgstr "Wähle das Eingabeverzeichnis"
 
-#: src/select_folder.rs:88
+#: src/select_folder.rs:91
 msgid "Select the folder where the JPG files are meant to be saved"
 msgstr "Wähle einen Ordner in dem die JPG Dateien gespeichert werden sollen"
 
-#: src/select_folder.rs:89
+#: src/select_folder.rs:92
 msgid "Select output directory"
 msgstr "Wähle das Ausgabeverzeichnis"

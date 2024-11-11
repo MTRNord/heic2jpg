@@ -10,3 +10,5 @@ Keywords=Gnome;GTK;
 # TRANSLATORS: Do NOT translate or transliterate this text (this is an icon file name)!
 Icon=@icon@
 StartupNotify=true
+DBusActivatable=true
+X-GNOME-UsesNotifications=true

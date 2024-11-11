@@ -49,6 +49,7 @@ fn main() {
     gtk::Window::set_default_icon_name(APP_ID);
 
     let app = main_application();
+    app.set_application_id(Some(APP_ID));
     app.set_resource_base_path(Some("/dev/nordgedanken/heic2jpg/"));
 
     let mut actions = RelmActionGroup::<AppActionGroup>::new();

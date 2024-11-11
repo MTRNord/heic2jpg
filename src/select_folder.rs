@@ -63,11 +63,12 @@ impl SimpleComponent for SelectFolder {
                     }
                 },
 
-                // If this is the output folder selector, add an Abort button
+                // If this is the output folder selector, add an Restart button
                 gtk::Button {
                     set_visible: model.direction == InOut::Output,
                     set_halign: gtk::Align::Center,
-                    set_label: &gettext("Abort"),
+                    set_label: &gettext("Restart"),
+                    add_css_class: "destructive-action",
                     connect_clicked[sender] => move |_| {
                         let _ = sender.output(SelectFolderOut::AbortLast);
                     }

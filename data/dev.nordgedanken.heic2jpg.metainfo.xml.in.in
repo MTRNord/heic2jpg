@@ -5,17 +5,17 @@
   <metadata_license>CC0</metadata_license>
   <project_license>AGPL-3.0</project_license>
   <name>Heic2JPG</name>
-  <summary>A small app to batch convert heic images to jpg</summary>
+  <summary>A small app to batch convert heic images to jpg.</summary>
   <description>
-    <p>A small app to batch convert heic images to jpg.</p>
+    <p>A small app to batch convert heic images to jpg from an input folder to an output folder.</p>
   </description>
   <categories>
     <category>Graphics</category>
   </categories>
   <screenshots>
     <screenshot type="default">
-      <image xml:lang="en">https://github.com/MTRNord/heic2jpg/raw/main/data/resources/screenshots/screenshot1.png</image>
-      <caption xml:lang="en">Main window</caption>
+      <image>https://github.com/MTRNord/heic2jpg/raw/main/data/resources/screenshots/screenshot1.png</image>
+      <caption>Main window</caption>
     </screenshot>
   </screenshots>
   <url type="homepage">https://github.com/MTRNord/heic2jpg</url>

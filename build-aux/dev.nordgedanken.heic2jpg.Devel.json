@@ -10,7 +10,6 @@
     "command": "heic2jpg",
     "finish-args": [
         "--share=ipc",
-        "--filesystem=host:create",
         "--socket=fallback-x11",
         "--socket=wayland",
         "--device=dri",

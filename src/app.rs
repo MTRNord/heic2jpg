@@ -96,11 +96,9 @@ impl SimpleComponent for App {
                     None
                 },
 
-            gtk::Box {
-                set_orientation: gtk::Orientation::Vertical,
-                set_vexpand: true,
+            adw::ToolbarView {
 
-                adw::HeaderBar {
+               add_top_bar = &adw::HeaderBar {
                     #[wrap(Some)]
                     set_title_widget = &adw::WindowTitle {
                         set_title: &gettext("Convert Heic to JPG"),

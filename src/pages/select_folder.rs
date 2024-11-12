@@ -8,13 +8,13 @@ use relm4_components::open_dialog::*;
 use std::path::PathBuf;
 
 #[derive(Debug, PartialEq)]
-pub(super) enum InOut {
+pub(crate) enum InOut {
     Input,
     Output,
 }
 
 #[derive(Debug)]
-pub(super) struct SelectFolder {
+pub(crate) struct SelectFolder {
     open_dialog: Controller<OpenDialog>,
     folder: Option<PathBuf>,
     description: String,
@@ -23,14 +23,14 @@ pub(super) struct SelectFolder {
 }
 
 #[derive(Debug)]
-pub(super) enum SelectFolderMsg {
+pub(crate) enum SelectFolderMsg {
     OpenRequest,
     OpenResponse(PathBuf),
     Ignore,
 }
 
 #[derive(Debug)]
-pub(super) enum SelectFolderOut {
+pub(crate) enum SelectFolderOut {
     FolderSelected(PathBuf),
     AbortLast,
 }
@@ -47,6 +47,7 @@ impl SimpleComponent for SelectFolder {
             set_vexpand: true,
             set_title: &gettext("Select Folder"),
             set_description: Some(&model.description),
+            set_icon_name: Some("mouse-click"),
 
             gtk::Box {
                 set_halign: gtk::Align::Center,

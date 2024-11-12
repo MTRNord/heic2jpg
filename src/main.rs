@@ -1,9 +1,9 @@
 #[rustfmt::skip]
 mod config;
 mod app;
-mod conversion_worker;
 mod modals;
-mod select_folder;
+mod pages;
+mod workers;
 
 use config::{APP_ID, GETTEXT_PACKAGE, LOCALEDIR, RESOURCES_FILE};
 use gettextrs::LocaleCategory;

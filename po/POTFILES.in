@@ -4,7 +4,10 @@ data/dev.nordgedanken.heic2jpg.metainfo.xml.in.in
 data/resources/ui/shortcuts.ui
 src/app.rs
 src/main.rs
-src/select_folder.rs
-src/conversion_worker.rs
 src/modals/about.rs
 src/modals/mod.rs
+src/pages/finished_page.rs
+src/pages/mod.rs
+src/pages/select_folder.rs
+src/workers/conversion_worker.rs
+src/workers/mod.rs

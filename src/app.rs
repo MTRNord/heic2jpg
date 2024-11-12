@@ -1,7 +1,11 @@
 use crate::config::{APP_ID, PROFILE};
-use crate::conversion_worker::{ConversionWorker, ConversionWorkerInputMsg, ConversionWorkerMsg};
 use crate::modals::about::AboutDialog;
-use crate::select_folder::{InOut, SelectFolder, SelectFolderOut};
+use crate::pages::finished_page::{self, FinishedPage};
+use crate::pages::progressing_page::{ProgressingPage, ProgressingPageMsg};
+use crate::pages::select_folder::{InOut, SelectFolder, SelectFolderOut};
+use crate::workers::conversion_worker::{
+    ConversionWorker, ConversionWorkerInputMsg, ConversionWorkerMsg,
+};
 use gettextrs::gettext;
 use gtk::prelude::*;
 use gtk::{gio, glib};
@@ -12,6 +16,7 @@ use relm4::{
     Controller, WorkerController,
 };
 use std::path::PathBuf;
+use tracing::info;
 
 enum Mode {
     InputSelection,
@@ -26,13 +31,13 @@ pub(super) struct App {
     about_dialog: Controller<AboutDialog>,
     input_folder_selector: Controller<SelectFolder>,
     output_folder_selector: Controller<SelectFolder>,
+    progressing_page: Controller<ProgressingPage>,
+    finished_page: Controller<FinishedPage>,
     input_folder: Option<PathBuf>,
     output_folder: Option<PathBuf>,
     conversion_worker: WorkerController<ConversionWorker>,
     mode: Mode,
-    progress: f64,
     failure: Option<String>,
-    file_count: usize,
 }
 
 #[derive(Debug)]
@@ -77,7 +82,10 @@ impl SimpleComponent for App {
         #[root]
         main_window = adw::ApplicationWindow::new(&main_application()) {
             set_visible: true,
-            set_resizable: true,
+            set_default_width: 650,
+            set_default_height: 600,
+            set_width_request: 360,
+            set_height_request: 294,
 
             connect_close_request[sender] => move |_| {
                 sender.input(AppMsg::Quit);
@@ -101,7 +109,6 @@ impl SimpleComponent for App {
                 },
 
             adw::ToolbarView {
-
                add_top_bar = &adw::HeaderBar {
                     #[wrap(Some)]
                     set_title_widget = &adw::WindowTitle {
@@ -116,61 +123,17 @@ impl SimpleComponent for App {
                 #[transition = "SlideRight"]
                 match model.mode {
                     Mode::Progressing => {
-                        adw::StatusPage {
-                            set_hexpand: true,
+                        gtk::Box {
                             set_vexpand: true,
-                            set_title: &gettext("Converting"),
-                            set_description: Some(&gettext("Please wait while the conversion is in progress")),
-                            gtk::Box {
-                                set_halign: gtk::Align::Center,
-                                set_orientation: gtk::Orientation::Vertical,
-                                set_spacing: 8,
-
-                                gtk::Label {
-                                    set_xalign: 0.5,
-                                    #[watch]
-                                    set_visible: model.file_count > 0,
-                                    #[watch]
-                                    set_label: &format!(
-                                        "{} / {}",
-                                        model.file_count as u32 * model.progress as u32,
-                                        model.file_count
-                                    ),
-                                },
-                                gtk::ProgressBar {
-                                    set_hexpand: true,
-                                    #[watch]
-                                    set_fraction: model.progress,
-                                }
-                            }
+                            set_hexpand: true,
+                            append = model.progressing_page.widget(),
                         }
                     }
                     Mode::Finished => {
-                        adw::StatusPage {
-                            set_hexpand: true,
+                        gtk::Box {
                             set_vexpand: true,
-                            set_title: &gettext("Conversion Complete"),
-                            set_description: Some(&gettext("The conversion was successful")),
-                            gtk::Box {
-                                set_halign: gtk::Align::Center,
-                                set_orientation: gtk::Orientation::Horizontal,
-                                set_spacing: 24,
-
-                                gtk::Button {
-                                    set_label: "Close",
-                                    add_css_class: "suggested-action",
-                                    add_css_class: "pill",
-                                    connect_clicked[sender] => move |_| {
-                                        sender.input(AppMsg::Quit);
-                                    }
-                                },
-                                gtk::Button {
-                                    set_label: "Restart",
-                                    connect_clicked[sender] => move |_| {
-                                        sender.input(AppMsg::StartOver);
-                                    }
-                                }
-                            }
+                            set_hexpand: true,
+                            append = model.finished_page.widget(),
                         }
                     }
                     Mode::Failed => {
@@ -180,6 +143,7 @@ impl SimpleComponent for App {
                             set_title: &gettext("Conversion Failed"),
                             #[watch]
                             set_description: model.failure.as_deref(),
+                            set_icon_name: Some("error-outline"),
 
                             gtk::Box {
                                 set_halign: gtk::Align::Center,
@@ -220,6 +184,7 @@ impl SimpleComponent for App {
                             set_vexpand: true,
                             set_title: &gettext("Start Conversion"),
                             set_description: Some(&gettext("Click the button below to start the conversion")),
+                            set_icon_name: Some("blend-tool"),
 
                             gtk::Box {
                                 set_halign: gtk::Align::Center,
@@ -283,17 +248,26 @@ impl SimpleComponent for App {
                     ConversionWorkerMsg::ConversionFailed(e) => AppMsg::ConversionFailed(e),
                 });
 
+        let progressing_page = ProgressingPage::builder().launch(()).detach();
+        let finished_page =
+            FinishedPage::builder()
+                .launch(())
+                .forward(sender.input_sender(), |msg| match msg {
+                    finished_page::FinishedPageMsg::StartOver => AppMsg::StartOver,
+                    finished_page::FinishedPageMsg::Quit => AppMsg::Quit,
+                });
+
         let model = Self {
             about_dialog,
             input_folder_selector,
             output_folder_selector,
+            progressing_page,
+            finished_page,
             conversion_worker,
             input_folder: None,
             output_folder: None,
             mode: Mode::InputSelection,
-            progress: 0.0,
             failure: None,
-            file_count: 0,
         };
 
         let widgets = view_output!();
@@ -326,8 +300,11 @@ impl SimpleComponent for App {
     fn update(&mut self, message: Self::Input, _sender: ComponentSender<Self>) {
         match message {
             AppMsg::ConversionStarted(number) => {
-                self.file_count = number;
                 self.mode = Mode::Progressing;
+                let _ = self
+                    .progressing_page
+                    .sender()
+                    .send(ProgressingPageMsg::SetFileCount(number));
             }
             AppMsg::InputFolderSelected(path) => {
                 self.input_folder = Some(path);
@@ -350,13 +327,16 @@ impl SimpleComponent for App {
                 if let (Some(input_folder), Some(output_folder)) =
                     (&self.input_folder, &self.output_folder)
                 {
+                    info!(
+                        "Starting conversion from {:?} to {:?}",
+                        input_folder, output_folder
+                    );
                     let _ = self.conversion_worker.sender().send(
                         ConversionWorkerInputMsg::ConvertFolder(
                             input_folder.clone(),
                             output_folder.clone(),
                         ),
                     );
-                    self.mode = Mode::Progressing;
                 } else {
                     self.mode = Mode::Failed;
                     self.failure =
@@ -365,7 +345,10 @@ impl SimpleComponent for App {
             }
             AppMsg::ProgressUpdate(progress) => {
                 if let Mode::Progressing = self.mode {
-                    self.progress = progress;
+                    let _ = self
+                        .progressing_page
+                        .sender()
+                        .send(ProgressingPageMsg::SetProgress(progress));
                 }
             }
             AppMsg::ConversionComplete => {
@@ -374,6 +357,11 @@ impl SimpleComponent for App {
                 notification.set_body(Some(&gettext("The conversion was successful")));
                 notification.set_category(Some("transfer.complete"));
                 notification.set_priority(gio::NotificationPriority::Normal);
+                let pass_icon = gio::Icon::for_string("test-pass");
+                if let Ok(pass_icon) = pass_icon {
+                    // Ends up as an empty icon on my system. Something is wrong with the icon loading?.
+                    //notification.set_icon(&pass_icon);
+                }
 
                 let app = relm4::main_application();
                 app.send_notification(None, &notification);
@@ -385,9 +373,15 @@ impl SimpleComponent for App {
             AppMsg::StartOver => {
                 self.input_folder = None;
                 self.output_folder = None;
-                self.progress = 0.0;
+                let _ = self
+                    .progressing_page
+                    .sender()
+                    .send(ProgressingPageMsg::SetProgress(0.0));
                 self.failure = None;
-                self.file_count = 0;
+                let _ = self
+                    .progressing_page
+                    .sender()
+                    .send(ProgressingPageMsg::SetFileCount(0));
                 self.mode = Mode::InputSelection;
             }
             AppMsg::Noop => {}
